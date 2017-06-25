@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>title</title>
+</head>
+
+<body>
+    <canvas id="canvas" width="800" height="600" style="border:1px solid #000;"></canvas>
+    <script src="jquery-2.1.4.js"></script>
+    <script>
+        function Clock(opt) {
+            if (!opt) throw new Error("请提供参数");
+            var requireArgs = "bigX,bigY,bigR".split(",");
+            requireArgs.forEach(function(v) {
+                if (!opt.hasOwnProperty(v)) throw new Error("请给参数提供属性：" + v);
+            });
+            var defaultOpt = {
+                bigColor: "#335F9A",
+                bigLineWidth: 2
+            }
+            $.extend(this, defaultOpt, opt);
+            this.ctx = this.canvas.getContext("2d");
+
+            this.init();
+        };
+        Clock.prototype = {
+            constructor: Clock,
+            init: function() {
+                this.drawBigCircle();
+                this.drawTicks();
+            },
+            //绘制蓝色大圆
+            drawBigCircle: function() {
+                var ctx = this.ctx;
+                ctx.beginPath();
+                ctx.strokeStyle = this.bigColor;
+                ctx.lineWidth = this.bigLineWidth;
+                ctx.arc(this.bigX, this.bigY, this.bigR, 0, 2 * Math.PI);
+                ctx.stroke();
+            },
+            //绘制刻度线
+            drawTicks: function() {
+                var ctx = this.ctx;
+                ctx.strokeStyle = "black";
+                var startRadian = 0;
+                for (var i = 0; i < 60; i++) {
+                    //处理刻度线长度和线宽
+                    var length;
+                    var width;
+                    length = this.tick[i % 5 == 0 ? "big" : "small"].length;
+                    width = this.tick[i % 5 == 0 ? "big" : "small"].width;
+
+                    //相邻刻度线之间的弧度差
+                    var singleRadian = 2 * Math.PI / 60;
+                    //计算出每一个刻度线的弧度值
+                    var radian = startRadian + i * singleRadian;
+
+                    //为什么要用this.bigR - this.bigLineWidth / 2刻度线才会在大圆下？因为链接两点都是从中线开始，改变连接点从边缘开始
+                    var h1 = Math.sin(radian) * (this.bigR - this.bigLineWidth / 2);
+                    var b1 = Math.cos(radian) * (this.bigR - this.bigLineWidth / 2);
+
+                    //起点
+                    var x1 = this.bigX + b1;
+                    var y1 = this.bigY + h1;
+
+                    var h2 = Math.sin(radian) * (this.bigR - length);
+                    var b2 = Math.cos(radian) * (this.bigR - length);
+
+                    //终点
+                    var x2 = this.bigX + b2;
+                    var y2 = this.bigY + h2;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = width;
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+            }
+        };
+        var opt = {
+            canvas: document.querySelector("#canvas"),
+            bigX: 300,
+            bigY: 300,
+            bigR: 150,
+            bigColor: "gray",
+            bigLineWidth: 10,
+            tick: {
+                //小刻度线
+                small: {
+                    length: 15,
+                    width: 4
+                },
+                //大刻度线
+                big: {
+                    length: 26,
+                    width: 8
+                }
+            }
+        };
+        var clock = new Clock(opt);
+    </script>
+</body>
+
+</html>
