@@ -1,4 +1,7 @@
 // Utilities
+document.querySelector('body').addEventListener('touchstart', function (ev) {
+    event.preventDefault();
+});
 var Vector3 = {};
 var Matrix44 = {};
 Vector3.create = function(x, y, z) {
